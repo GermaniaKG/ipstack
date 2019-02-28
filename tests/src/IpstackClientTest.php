@@ -45,11 +45,18 @@ class IpstackClientTest extends \PHPUnit\Framework\TestCase
 		$client_stub = $client->reveal();
 
 
-		return array(
-			[ new Client,   $endpoint, $apikey, $ip ],
-			[ null,         $endpoint, $apikey, $ip ],
+		$params_set = array(
 			[ $client_stub, "foo",     "bar",   $ip ]
 		);
+
+		if (empty($apikey)):
+			return $params_set;
+		endif;
+
+		return array_merge($params_set, array(
+			[ new Client,   $endpoint, $apikey, $ip ],
+			[ null,         $endpoint, $apikey, $ip ],
+		));
 	}
 
 
