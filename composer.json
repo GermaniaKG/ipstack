@@ -1,0 +1,45 @@
+{
+	"name": "germania-kg/ipstack-client",
+	"description": "Callable wrapper around the ipstack.com API",
+
+	"license": "MIT",
+
+	"authors": [
+		{
+			"name":  "Carsten Witt",
+			"email": "carstenwitt@germania-kg.de",
+			"role":  "Developer"
+		}
+	],
+
+	"autoload": {
+		"psr-4": {
+			"Germania\\IpstackClient\\": "src"
+		}
+	},
+
+  "autoload-dev": {
+      "psr-4": {
+      	"tests\\": "tests/src"
+      }
+  },
+
+	"require": {
+		"php": "^7.0",
+        "guzzlehttp/guzzle": "^6.3"
+	},
+
+    "require-dev": {
+        "php-coveralls/php-coveralls": "^2.0",
+        "phpunit/phpunit": "^5.7|^6.0|^7.0"
+    },
+
+    "scripts": {
+          "phpunit": "phpunit",
+
+          "test": [
+              "@phpunit"
+          ]
+    }
+
+}

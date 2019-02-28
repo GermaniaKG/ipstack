@@ -1,0 +1,86 @@
+# Germania KG · ipstack client
+
+PHP client for the [**ipstack API**](https://ipstack.com/)
+
+## Usage
+
+```php
+<?php
+use Germania\IpstackClient\IpstackClient;
+
+$endpoint = "http://api.ipstack.com/";
+$api_key  = "ypur_api_key";
+
+$ipstack = new IpstackClient( $endpoint, $api_key);
+
+$client_api = "8.8.8.8";
+
+// array
+$response = $ipstack->get( $client_ip );
+```
+
+## ipstack response
+
+Whilst *ipstack* returns JSON, the *IpstackClient* converts it to an array. Here is a shortened example; For a full example see **ipstack's [documentation**](https://ipstack.com/documentation#standard) on Standard IP lookups: 
+
+    Array ()
+    	[ip] => 8.8.8.8
+      [type] => ipv4
+      [continent_code] => EU
+      [continent_name] => Europe
+      [country_code] => DE
+      [country_name] => Germany
+      [region_code] => SH
+      [region_name] => Schleswig-Holstein
+      [latitude] => 54.3667
+      [longitude] => 10.2
+      ...
+    )
+## Exceptions
+
+The *IpstackClient* checks for *Guzzle Exceptions* during request and evaluate *ipstack error responses.* Both will be abstracted to **IpstackRequestException,** or **IpstackResponseException** respectively, both of them  implementing the **IpstackExceptionInterface.**
+
+```php
+<?php
+use Germania\IpstackClient\IpstackExceptionInterface;
+use Germania\IpstackClient\IpstackRequestException;
+use Germania\IpstackClient\IpstackResponseException;
+
+try {
+  $ipstack = new IpstackClient( $endpoint, $api_key);
+  $response = $ipstack->get( $client_ip );
+}
+catch( IpstackExceptionInterface $e ) {
+
+  // a) IpstackResponseException
+  // b) IpstackRequestException 
+  echo $e->getMessage();
+  echo $e->getCode();  
+  
+  // to get Guzzle's original exception:
+  $original_guzzle_exception = $e->getPrevious();
+}
+```
+
+
+
+## Unit testing
+
+Copy **phpunit.xml.dist** to **phunit.xml** and adapt the ipstack-related globals. Endpoint and API key are self-explaining; the dummy IP is the IP address to check during test runs. 
+
+```xml
+	<php>
+		<var name="IPSTACK_ENDPOINT"   value="http://api.ipstack.com/" />
+		<var name="IPSTACK_APIKEY"     value="your_api_key" />
+		<var name="IPSTACK_DUMMY_IP"   value="8.8.4.4" />
+	</php>
+```
+
+**Run phpunit** using vendor binary or composer *test* script:
+
+```bash
+$ vendor/bin/phpunit
+# or
+$ composer test
+```
+

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="true"
+		 stopOnFailure="true"
+		 bootstrap="tests/bootstrap.php"
+		 beStrictAboutCoversAnnotation="true"
+		 verbose="true">
+
+	<testsuites>
+		<testsuite name="Test Suite">
+			<directory>tests/src</directory>
+		</testsuite>
+	</testsuites>
+
+	<filter>
+		<whitelist processUncoveredFilesFromWhitelist="true">
+			<directory>src</directory>
+		</whitelist>
+	</filter>
+
+	<php>
+		<var name="IPSTACK_ENDPOINT"   value="http://api.ipstack.com/" />
+		<var name="IPSTACK_APIKEY"     value="TOPSECRET" />
+		<var name="IPSTACK_DUMMY_IP"   value="8.8.4.4" />
+	</php>
+
+	<logging>
+		<log type="coverage-clover" target="var/build/logs/clover.xml"/>
+		<log type="coverage-html"   target="var/build/logs/html/"/>
+		<log type="coverage-text"   target="php://stdout" showUncoveredFiles="true" />
+		<log type="testdox-html"    target="var/build/logs/testdox.html"/>
+		<log type="testdox-text"    target="var/build/logs/testdox.txt"/>
+	</logging>
+
+</phpunit>
