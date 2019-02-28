@@ -2,6 +2,16 @@
 
 PHP client for the [**ipstack API**](https://ipstack.com/)
 
+
+
+## Installation
+
+```bash
+$ composer require germania-kg/ipstack
+```
+
+
+
 ## Usage
 
 ```php
@@ -18,6 +28,8 @@ $client_api = "8.8.8.8";
 // array
 $response = $ipstack->get( $client_ip );
 ```
+
+
 
 ## ipstack response
 
@@ -36,6 +48,8 @@ Whilst *ipstack* returns JSON, the *IpstackClient* converts it to an array. Here
       [longitude] => 10.2
       ...
     )
+
+
 ## Exceptions
 
 The *IpstackClient* checks for *Guzzle Exceptions* during request and evaluate *ipstack error responses.* Both will be abstracted to **IpstackRequestException,** or **IpstackResponseException** respectively, both of them  implementing the **IpstackExceptionInterface.**
@@ -60,6 +74,16 @@ catch( IpstackExceptionInterface $e ) {
   // to get Guzzle's original exception:
   $original_guzzle_exception = $e->getPrevious();
 }
+```
+
+
+
+## Development
+
+```bash
+$ git clone https://github.com/GermaniaKG/ipstack.git
+$ cd ipstack
+$ composer install
 ```
 
 
