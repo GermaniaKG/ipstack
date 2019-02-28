@@ -1,8 +1,13 @@
 # Germania KG · ipstack client
 
-PHP client for the [**ipstack API**](https://ipstack.com/)
+**PHP client for the [ipstack API](https://ipstack.com/)**
 
-
+[![Packagist](https://img.shields.io/packagist/v/germania-kg/ipstack.svg?style=flat)](https://packagist.org/packages/germania-kg/ipstack)
+[![PHP version](https://img.shields.io/packagist/php-v/germania-kg/ipstack.svg)](https://packagist.org/packages/germania-kg/ipstack)
+[![Build Status](https://img.shields.io/travis/GermaniaKG/ipstack.svg?label=Travis%20CI)](https://travis-ci.org/GermaniaKG/ipstack)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/GermaniaKG/ipstack/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/GermaniaKG/ipstack/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/GermaniaKG/ipstack/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/GermaniaKG/ipstack/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/GermaniaKG/ipstack/badges/build.png?b=master)](https://scrutinizer-ci.com/g/GermaniaKG/ipstack/build-status/master)
 
 ## Installation
 
