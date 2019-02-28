@@ -39,11 +39,8 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
         $ipstack = $item->get();
 
         // No valid item?
-        if($item->isMiss()):
+        if(!$item->isHit()):
             $this->logger->debug("No ipstack info in cache");
-
-            // Let other processes know that this one is rebuilding the data.
-            $item->lock();
 
             // Run intensive code: Ask ipstack directly
             $ipstack = $this->ipstack_client->get( $client_ip, $custom_query );
@@ -52,7 +49,7 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
             $this->logger->info("Write ipstack info to cache", $ipstack);
             $this->cache->save($item->set($ipstack));
 
-        // Valid cache item found
+        // Valid item found
         else:
             $this->logger->notice("Found ipstack info in cache", $ipstack);
         endif;
