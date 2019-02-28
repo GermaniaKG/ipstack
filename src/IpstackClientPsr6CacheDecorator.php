@@ -49,7 +49,7 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
             $this->logger->info("Write ipstack info to cache", $ipstack);
             $this->cache->save($item->set($ipstack));
 
-        // Valid cache item found
+        // Valid item found
         else:
             $this->logger->notice("Found ipstack info in cache", $ipstack);
         endif;
