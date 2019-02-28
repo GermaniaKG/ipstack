@@ -1,6 +1,6 @@
 {
 	"name": "germania-kg/ipstack",
-	"description": "PHP client for ipstack Standard IP lookups",
+	"description": "PHP client for ipstack Standard IP lookups with PSR-6 cache support",
 
 	"license": "MIT",
 
