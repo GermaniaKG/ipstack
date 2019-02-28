@@ -23,15 +23,23 @@ $ composer require germania-kg/ipstack
 <?php
 use Germania\IpstackClient\IpstackClient;
 
-$endpoint = "http://api.ipstack.com/";
-$api_key  = "your_api_key";
+// Setup the Client
+$endpoint  = "http://api.ipstack.com/";
+$api_key   = "your_api_key";
+$ipstack   = new IpstackClient( $endpoint, $api_key);
 
-$ipstack = new IpstackClient( $endpoint, $api_key);
+// Ask ipstack
+$client_ip = "8.8.8.8";
+$response  = $ipstack->get( $client_ip );
+```
 
-$client_api = "8.8.8.8";
+**Customizing the response:** You can customize the ipstack response by adding certain fields to the underlying request, as explained in the ipstack docs on [“Specify Response Fields”](https://ipstack.com/documentation#fields). Just pass an array with query fields which will be added to the GET request:
 
-// array
-$response = $ipstack->get( $client_ip );
+```php
+$response = $ipstack->get( "8.8.8.8", array(
+  'language' => "de",
+	'fields'   => "ip,country_code,country_name,latitude,longitude,region_name"
+));
 ```
 
 
@@ -53,6 +61,7 @@ Whilst *ipstack* returns JSON, the *IpstackClient* converts it to an array. Here
       [longitude] => 10.2
       ...
     )
+
 
 
 ## Exceptions
