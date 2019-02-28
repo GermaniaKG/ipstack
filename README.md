@@ -24,7 +24,7 @@ $ composer require germania-kg/ipstack
 use Germania\IpstackClient\IpstackClient;
 
 $endpoint = "http://api.ipstack.com/";
-$api_key  = "ypur_api_key";
+$api_key  = "your_api_key";
 
 $ipstack = new IpstackClient( $endpoint, $api_key);
 
@@ -38,7 +38,7 @@ $response = $ipstack->get( $client_ip );
 
 ## ipstack response
 
-Whilst *ipstack* returns JSON, the *IpstackClient* converts it to an array. Here is a shortened example; For a full example see **ipstack's [documentation**](https://ipstack.com/documentation#standard) on Standard IP lookups: 
+Whilst *ipstack* returns JSON, the *IpstackClient* converts it to an array. Here is a shortened example; For a full example see **ipstack's [documentation](https://ipstack.com/documentation#standard)** on Standard IP lookups: 
 
     Array ()
     	[ip] => 8.8.8.8
