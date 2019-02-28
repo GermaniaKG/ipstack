@@ -34,7 +34,7 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
 	public function get( string $client_ip, array $custom_query = array() ) : array
     {
 
-        $item = $this->cache->getItem( $client_ip );
+        $item = $this->cache->getItem( sha1($client_ip) );
 
         $ipstack = $item->get();
 
