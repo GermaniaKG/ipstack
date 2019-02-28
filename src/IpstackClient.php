@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Psr\Log\LoggerAwareTrait;
 
-class IpstackClient implements IpstackClientInterface{
+class IpstackClient implements IpstackClientInterface {
 	
 	use LoggerAwareTrait;
 
