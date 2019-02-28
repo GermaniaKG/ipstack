@@ -1,6 +1,6 @@
 {
-	"name": "germania-kg/ipstack-client",
-	"description": "Callable wrapper around the ipstack.com API",
+	"name": "germania-kg/ipstack",
+	"description": "PHP client for ipstack Standard IP lookups",
 
 	"license": "MIT",
 
