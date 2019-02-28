@@ -1,6 +1,6 @@
 # Germania KG · ipstack client
 
-**PHP client for the [ipstack API](https://ipstack.com/)**
+**PHP client for the [ipstack API](https://ipstack.com/) with PSR-6 cache support**
 
 [![Packagist](https://img.shields.io/packagist/v/germania-kg/ipstack.svg?style=flat)](https://packagist.org/packages/germania-kg/ipstack)
 [![PHP version](https://img.shields.io/packagist/php-v/germania-kg/ipstack.svg)](https://packagist.org/packages/germania-kg/ipstack)
@@ -33,7 +33,9 @@ $client_ip = "8.8.8.8";
 $response  = $ipstack->get( $client_ip );
 ```
 
-**Customizing the response:** You can customize the ipstack response by adding certain fields to the underlying request, as explained in the ipstack docs on [“Specify Response Fields”](https://ipstack.com/documentation#fields). Just pass an array with query fields which will be added to the GET request:
+### Customizing the response
+
+You can customize the ipstack response by adding certain fields to the underlying request, as explained in the ipstack docs on [“Specify Response Fields”](https://ipstack.com/documentation#fields). Just pass an array with query fields which will be added to the GET request:
 
 ```php
 $response = $ipstack->get( "8.8.8.8", array(
@@ -41,6 +43,35 @@ $response = $ipstack->get( "8.8.8.8", array(
 	'fields'   => "ip,country_code,country_name,latitude,longitude,region_name"
 ));
 ```
+
+### Result caching
+
+If you are using a ipstack [*free plan*](https://ipstack.com/plan) limited to with 10.000 requests a month, you may want to save requests by saving the lookup results to a PSR-6 Cache. The **IpstackClientPsr6CacheDecorator** also implements the **IpstackClientInterface** and thus can transparently be used.
+
+Its constructor accepts your **IpstackClient** instance and a **PSR-6 CacheItemPool** instance. This example uses the cache implementation from [Stash](http://www.stashphp.com/):
+
+```php
+<?php
+use Germania\IpstackClient\IpstackClientPsr6CacheDecorator;
+use Germania\IpstackClient\IpstackClient;
+use Stash\Pool as CacheItemPool;
+
+// Setup your client as shown above
+$ipstack = new IpstackClient( $endpoint, $api_key);
+
+// Example cache 
+$cache   = new \Stash\Pool(
+  new \Stash\Driver\Sqlite( array('path' => "/tmp" ))
+);
+
+// Setup the decorator
+$caching_ipstack = new IpstackClientPsr6CacheDecorator($ipstack, $cache);
+
+// Use as usual
+$response = $caching_ipstack->get( "8.8.8.8" );
+```
+
+
 
 
 
@@ -89,6 +120,8 @@ catch( IpstackExceptionInterface $e ) {
   $original_guzzle_exception = $e->getPrevious();
 }
 ```
+
+
 
 
 
