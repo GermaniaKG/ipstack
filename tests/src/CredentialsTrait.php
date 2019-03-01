@@ -8,7 +8,8 @@ use Prophecy\Argument;
 
 trait CredentialsTrait
 {
-	public function provideValidCredentials()
+
+	public function provideValidCredentials( )
 	{
 
 		$ip       = $GLOBALS['IPSTACK_DUMMY_IP'];
