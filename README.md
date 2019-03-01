@@ -1,6 +1,6 @@
 # Germania KG · ipstack client
 
-**PHP client for the [ipstack API](https://ipstack.com/) with PSR-6 cache support**
+**PHP client for the [ipstack API](https://ipstack.com/) with PSR-6 cache support and Slim3 middleware**
 
 [![Packagist](https://img.shields.io/packagist/v/germania-kg/ipstack.svg?style=flat)](https://packagist.org/packages/germania-kg/ipstack)
 [![PHP version](https://img.shields.io/packagist/php-v/germania-kg/ipstack.svg)](https://packagist.org/packages/germania-kg/ipstack)
@@ -17,7 +17,7 @@ $ composer require germania-kg/ipstack
 
 
 
-## Usage
+## Using ipstack 
 
 ```php
 <?php
@@ -33,6 +33,30 @@ $client_ip = "8.8.8.8";
 $response  = $ipstack->get( $client_ip );
 ```
 
+
+
+### Response example
+
+The *IpstackClient* internally works with array and thus asks *ipstack* to return JSON. Here is a shortened example; For a full example see **ipstack's [documentation](https://ipstack.com/documentation#standard)** on Standard IP lookups: 
+
+```
+Array ()
+	[ip] => 8.8.8.8
+  [type] => ipv4
+  [continent_code] => EU
+  [continent_name] => Europe
+  [country_code] => DE
+  [country_name] => Germany
+  [region_code] => SH
+  [region_name] => Schleswig-Holstein
+  [latitude] => 54.3667
+  [longitude] => 10.2
+  ...
+)
+```
+
+
+
 ### Customizing the response
 
 You can customize the ipstack response by adding certain fields to the underlying request, as explained in the ipstack docs on [“Specify Response Fields”](https://ipstack.com/documentation#fields). Just pass an array with query fields which will be added to the GET request:
@@ -44,9 +68,11 @@ $response = $ipstack->get( "8.8.8.8", array(
 ));
 ```
 
-### Result caching
 
-If you are using a ipstack [*free plan*](https://ipstack.com/plan) limited to with 10.000 requests a month, you may want to save requests by saving the lookup results to a PSR-6 Cache. The **IpstackClientPsr6CacheDecorator** also implements the **IpstackClientInterface** and thus can transparently be used.
+
+## Caching the ipstack response
+
+If you are using a ipstack [*free plan*](https://ipstack.com/plan) limited to with 10.000 requests a month, you may want to save requests by saving the lookup results to a PSR-6 Cache. The **IpstackClientPsr6CacheDecorator** implements the **IpstackClientInterface** as well and thus can transparently be used in place of the *IpstackClient*.
 
 Its constructor accepts your **IpstackClient** instance and a **PSR-6 CacheItemPool** instance. This example uses the cache implementation from [Stash](http://www.stashphp.com/):
 
@@ -75,23 +101,68 @@ $response = $caching_ipstack->get( "8.8.8.8" );
 
 
 
-## ipstack response
+## Slim Middleware
 
-Whilst *ipstack* returns JSON, the *IpstackClient* converts it to an array. Here is a shortened example; For a full example see **ipstack's [documentation](https://ipstack.com/documentation#standard)** on Standard IP lookups: 
+The **IpstackMiddleware** uses the *IpstackClient* and injects a **ipstack** attribute to the *Request* object that carries the *IpstackClient's* response. 
 
-    Array ()
-    	[ip] => 8.8.8.8
-      [type] => ipv4
-      [continent_code] => EU
-      [continent_name] => Europe
-      [country_code] => DE
-      [country_name] => Germany
-      [region_code] => SH
-      [region_name] => Schleswig-Holstein
-      [latitude] => 54.3667
-      [longitude] => 10.2
-      ...
-    )
+```php
+<?php
+use Germania\IpstackClient\IpstackMiddleware;
+
+// Setup your client as shown above
+$ipstack = new IpstackClient( $endpoint, $api_key);
+
+// The middleware
+$ipstack_middleware = new IpstackMiddleware( $ipstack );
+
+// Setup Slim app
+$app = new \Slim\App;
+$app->add( $ipstack_middleware );
+
+```
+
+In your Controller, you then simply grab the ipsatck information from the *Request* object:
+
+```php
+$ipstack_attr = $request->getAttribute( "ipstack" );
+
+echo $ipstack_attr['ip'];
+echo $ipstack_attr['country_code'];
+echo $ipstack_attr['country_name'];
+```
+
+
+
+### A word on IP addresses
+
+The IP address used for the ipstack request is per default determined from `$_SERVER['REMOTE_ADDR']`. It is recommended to use **Rob Allen** aka **akrabat's [Client IP address middleware](https://github.com/akrabat/ip-address-middleware)** that determines the IP address more safely.
+
+**Pitfall 1:** Akrabats middleware must be used BEFORE the *IpstackMiddleware*. It must be added *second* to the Slim app.
+
+**Pitfall 2:** Akrabats middleware allows customizing the request attribute name for the client IP address. From the docs:
+
+> By default, the name of the attribute is '`ip_address`'. This can be changed by the third constructor parameter.
+
+This means, the IP may be stored in a custom request attribute. The *IpstackMiddleware* therefore must know this attribute name. 
+
+Simply pass the IP address attribute name as second constructor, be it default or custom. Remember, if you leave this parameter out,  `$_SERVER['REMOTE_ADDR']` will be used as fallback.
+
+```php
+<?php
+use RKA\Middleware\IpAddress as IpAddressMiddleware
+// Setup Slim app
+$app = new \Slim\App;
+
+// Executed second
+$ipstack_middleware = new IpstackMiddleware( $ipstack, "ip_address" );
+$app->add( $ipstack_middleware );
+
+// Executed first
+$checkProxyHeaders = true; // Note: Never trust the IP address for security processes!
+$trustedProxies = ['10.0.0.1', '10.0.0.2']; // example
+$akrabats_middleware = new IpAddressMiddleware($checkProxyHeaders, $trustedProxies);
+$app->add( $akrabats_middleware );
+```
 
 
 
