@@ -137,13 +137,14 @@ $ composer install
 
 ## Unit testing
 
-Copy **phpunit.xml.dist** to **phunit.xml** and adapt the ipstack-related globals. Endpoint and API key are self-explaining; the dummy IP is the IP address to check during test runs. 
+Copy **phpunit.xml.dist** to **phunit.xml** and adapt the ipstack-related globals. Endpoint and API key are self-explaining; the dummy **IP4** and **IP6** are IP addresses to check during test runs. The IP examples used here are [Google's DNS servers](https://developers.google.com/speed/public-dns/).
 
 ```xml
 <php>
   <var name="IPSTACK_ENDPOINT"   value="http://api.ipstack.com/" />
   <var name="IPSTACK_APIKEY"     value="your_api_key" />
-  <var name="IPSTACK_DUMMY_IP"   value="8.8.4.4" />
+  <var name="IPSTACK_DUMMY_IP4"  value="8.8.4.4" />
+  <var name="IPSTACK_DUMMY_IP6"  value="2001:4860:4860::8888" />
 </php>
 ```
 

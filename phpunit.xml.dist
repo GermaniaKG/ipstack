@@ -21,7 +21,8 @@
 	<php>
 		<var name="IPSTACK_ENDPOINT"   value="http://api.ipstack.com/" />
 		<var name="IPSTACK_APIKEY"     value="" />
-		<var name="IPSTACK_DUMMY_IP"   value="8.8.4.4" />
+		<var name="IPSTACK_DUMMY_IP4"   value="8.8.4.4" />
+		<var name="IPSTACK_DUMMY_IP6"   value="2001:4860:4860::8888" />
 		<var name="IPSTACK_CACHE_PATH" value="var/test-cache" />
 	</php>
 
