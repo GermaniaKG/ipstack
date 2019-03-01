@@ -41,7 +41,7 @@ The *IpstackClient* internally works with array and thus asks *ipstack* to retur
 
 ```
 Array ()
-	[ip] => 8.8.8.8
+  [ip] => 8.8.8.8
   [type] => ipv4
   [continent_code] => EU
   [continent_name] => Europe
@@ -64,7 +64,7 @@ You can customize the ipstack response by adding certain fields to the underlyin
 ```php
 $response = $ipstack->get( "8.8.8.8", array(
   'language' => "de",
-	'fields'   => "ip,country_code,country_name,latitude,longitude,region_name"
+  'fields'   => "ip,country_code,country_name,latitude,longitude,region_name"
 ));
 ```
 
