@@ -7,11 +7,11 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Prophecy\Argument;
-use Psr\Http\Message\ResponseInterface;
 
 class IpstackClientTest extends \PHPUnit\Framework\TestCase
 {
 
+	use CredentialsTrait;
 
 	/**
 	 * @dataProvider provideValidCredentials
@@ -26,37 +26,6 @@ class IpstackClientTest extends \PHPUnit\Framework\TestCase
 		$this->assertArrayHasKey( "ip", $result );
 		$this->assertArrayHasKey( "country_code", $result );
 		$this->assertArrayHasKey( "country_name", $result );
-	}
-
-
-	public function provideValidCredentials()
-	{
-
-		$ip       = $GLOBALS['IPSTACK_DUMMY_IP'];
-		$endpoint = $GLOBALS['IPSTACK_ENDPOINT'];
-		$apikey   = $GLOBALS['IPSTACK_APIKEY'];
-
-		$response = $this->prophesize( ResponseInterface::class);
-		$response->getBody()->willReturn( json_encode( array("ip" => $ip, "country_code" => "cc", "country_name" => "Country" )) );
-		$response_stub = $response->reveal();
-
-		$client = $this->prophesize( ClientInterface::class );
-		$client->request(Argument::type('string'), Argument::type('string'), Argument::type('array'))->willReturn( $response_stub );
-		$client_stub = $client->reveal();
-
-
-		$params_set = array(
-			[ $client_stub, "foo",     "bar",   $ip ]
-		);
-
-		if (empty($apikey)):
-			return $params_set;
-		endif;
-
-		return array_merge($params_set, array(
-			[ new Client,   $endpoint, $apikey, $ip ],
-			[ null,         $endpoint, $apikey, $ip ],
-		));
 	}
 
 
@@ -76,7 +45,8 @@ class IpstackClientTest extends \PHPUnit\Framework\TestCase
 	public function provideInvalidCredentials()
 	{
 		$endpoint = $GLOBALS['IPSTACK_ENDPOINT'];
-		$ip       = $GLOBALS['IPSTACK_DUMMY_IP'];
+		$ip4      = $GLOBALS['IPSTACK_DUMMY_IP4'];
+		$ip6      = $GLOBALS['IPSTACK_DUMMY_IP6'];
 
 		$client = $this->prophesize( ClientInterface::class );
 		$client->request(Argument::type('string'), Argument::type('string'), Argument::type('array'))->willThrow( RequestException::class );
@@ -84,9 +54,12 @@ class IpstackClientTest extends \PHPUnit\Framework\TestCase
 
 
 		return array(
-			[ new Client,   $endpoint, "",      $ip ],
-			[ null,         $endpoint, "wrong", $ip ],
-			[ $client_stub, $endpoint, "wrong", $ip ]
+			[ new Client,   $endpoint, "",      $ip4 ],
+			[ null,         $endpoint, "wrong", $ip4 ],
+			[ $client_stub, $endpoint, "wrong", $ip4 ],
+			[ new Client,   $endpoint, "",      $ip6 ],
+			[ null,         $endpoint, "wrong", $ip6 ],
+			[ $client_stub, $endpoint, "wrong", $ip6 ]
 		);
 	}
 
