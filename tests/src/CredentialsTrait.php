@@ -11,13 +11,14 @@ trait CredentialsTrait
 
 	public function provideValidCredentials( )
 	{
-
-		$ip       = $GLOBALS['IPSTACK_DUMMY_IP'];
 		$endpoint = $GLOBALS['IPSTACK_ENDPOINT'];
 		$apikey   = $GLOBALS['IPSTACK_APIKEY'];
 
+		$ip4      = $GLOBALS['IPSTACK_DUMMY_IP4'];
+		$ip6      = $GLOBALS['IPSTACK_DUMMY_IP6'];
+
 		$response = $this->prophesize( ResponseInterface::class);
-		$response->getBody()->willReturn( json_encode( array("ip" => $ip, "country_code" => "cc", "country_name" => "Country" )) );
+		$response->getBody()->willReturn( json_encode( array("ip" => $ip4, "country_code" => "cc", "country_name" => "Country" )) );
 		$response_stub = $response->reveal();
 
 		$client = $this->prophesize( ClientInterface::class );
@@ -26,7 +27,8 @@ trait CredentialsTrait
 
 
 		$params_set = array(
-			[ $client_stub, "foo",     "bar",   $ip ]
+			[ $client_stub, "foo",     "bar",   $ip4 ],
+			[ $client_stub, "foo",     "bar",   $ip6 ]
 		);
 
 		if (empty($apikey)):
@@ -34,8 +36,10 @@ trait CredentialsTrait
 		endif;
 
 		return array_merge($params_set, array(
-			[ new Client,   $endpoint, $apikey, $ip ],
-			[ null,         $endpoint, $apikey, $ip ],
+			[ new Client,   $endpoint, $apikey, $ip4 ],
+			[ null,         $endpoint, $apikey, $ip4 ],
+			[ new Client,   $endpoint, $apikey, $ip6 ],
+			[ null,         $endpoint, $apikey, $ip6 ]
 		));
 	}	
 }

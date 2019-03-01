@@ -64,16 +64,26 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 	public function provideResponsesAndIpStuff()
 	{
-		$client_ip = "8.8.4.4"; 
-		$ipstack_response_mock = [
-			'ip' => "8.8.4.4",
+		$ip4 = $GLOBALS['IPSTACK_DUMMY_IP4']; 
+		$ip6 = $GLOBALS['IPSTACK_DUMMY_IP6']; 
+
+		$ip4_ipstack_response_mock = [
+			'ip' => $ip4,
+			'country_code' => null,
+			'country_name' => null,
+		];
+		
+		$ip6_ipstack_response_mock = [
+			'ip' => $ip6,
 			'country_code' => null,
 			'country_name' => null,
 		];
 		
 		return array(
-			[ $ipstack_response_mock, "ip_address", $client_ip],
-			[ $ipstack_response_mock, null,         $client_ip]
+			[ $ip4_ipstack_response_mock, "ip_address", $ip4],
+			[ $ip4_ipstack_response_mock, null,         $ip4],
+			[ $ip6_ipstack_response_mock, "ip_address", $ip6],
+			[ $ip6_ipstack_response_mock, null,         $ip6]
 		);		
 	}
 

@@ -45,7 +45,8 @@ class IpstackClientTest extends \PHPUnit\Framework\TestCase
 	public function provideInvalidCredentials()
 	{
 		$endpoint = $GLOBALS['IPSTACK_ENDPOINT'];
-		$ip       = $GLOBALS['IPSTACK_DUMMY_IP'];
+		$ip4      = $GLOBALS['IPSTACK_DUMMY_IP4'];
+		$ip6      = $GLOBALS['IPSTACK_DUMMY_IP6'];
 
 		$client = $this->prophesize( ClientInterface::class );
 		$client->request(Argument::type('string'), Argument::type('string'), Argument::type('array'))->willThrow( RequestException::class );
@@ -53,9 +54,12 @@ class IpstackClientTest extends \PHPUnit\Framework\TestCase
 
 
 		return array(
-			[ new Client,   $endpoint, "",      $ip ],
-			[ null,         $endpoint, "wrong", $ip ],
-			[ $client_stub, $endpoint, "wrong", $ip ]
+			[ new Client,   $endpoint, "",      $ip4 ],
+			[ null,         $endpoint, "wrong", $ip4 ],
+			[ $client_stub, $endpoint, "wrong", $ip4 ],
+			[ new Client,   $endpoint, "",      $ip6 ],
+			[ null,         $endpoint, "wrong", $ip6 ],
+			[ $client_stub, $endpoint, "wrong", $ip6 ]
 		);
 	}
 
