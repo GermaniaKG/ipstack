@@ -149,7 +149,9 @@ Simply pass the IP address attribute name as second constructor, be it default o
 
 ```php
 <?php
-use RKA\Middleware\IpAddress as IpAddressMiddleware
+use RKA\Middleware\IpAddress as IpAddressMiddleware;
+use Germania\IpstackClient\IpstackMiddleware;
+
 // Setup Slim app
 $app = new \Slim\App;
 
