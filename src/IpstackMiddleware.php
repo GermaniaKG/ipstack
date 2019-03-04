@@ -13,7 +13,7 @@ use Psr\Log\NullLogger;
 
 
 /**
- * This Slim middlware class finds out the country where the client comes from
+ * This Slim-style "Double Pass" middleware finds out the country where the client comes from
  * and stores the country code (DE or CH) with PSR-7 Request attribute.
  *
  * Requirement:

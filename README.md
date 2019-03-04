@@ -1,6 +1,6 @@
 # Germania KG · ipstack client
 
-**PHP client for the [ipstack API](https://ipstack.com/) with PSR-6 cache support and Slim3 middleware**
+**PHP client for the [ipstack API](https://ipstack.com/) with PSR-6 cache support and Slim3-style “Double Pass” middleware**
 
 [![Packagist](https://img.shields.io/packagist/v/germania-kg/ipstack.svg?style=flat)](https://packagist.org/packages/germania-kg/ipstack)
 [![PHP version](https://img.shields.io/packagist/php-v/germania-kg/ipstack.svg)](https://packagist.org/packages/germania-kg/ipstack)
@@ -101,7 +101,7 @@ $response = $caching_ipstack->get( "8.8.8.8" );
 
 
 
-## Slim Middleware
+## Slim3-style “Double Pass” Middleware
 
 The **IpstackMiddleware** uses the *IpstackClient* and injects a **ipstack** attribute to the *Request* object that carries the *IpstackClient's* response. 
 
