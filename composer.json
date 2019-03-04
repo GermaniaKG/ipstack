@@ -3,8 +3,7 @@
 
 	"description": "PHP client for the ipstack API with PSR-6 cache support and Slim3 middleware",
 
-	"keywords": ["ipstack", "client", "PSR-6", "cache", "Slim3", "middlware"],
-
+	"keywords": ["ipstack", "client", "cache", "PSR-6", "PSR-7", "PSR-15", "Slim3", "middleware"],
 
 	"license": "MIT",
 
