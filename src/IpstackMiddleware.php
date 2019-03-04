@@ -4,6 +4,10 @@ namespace Germania\IpstackClient;
 use Germania\IpstackClient\IpstackClientInterface;
 use Germania\IpstackClient\IpstackExceptionInterface;
 
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
+
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -31,7 +35,7 @@ use Psr\Log\NullLogger;
  *     which asks the "IP to Geolocation" API from ipstack (https://ipstack.com). 
  *     Since we currently are using the "free plan", usage is limited to 10.000 API calls per month.
  */
-class IpstackMiddleware
+class IpstackMiddleware implements MiddlewareInterface
 {
     use LoggerAwareTrait;
 
@@ -101,6 +105,28 @@ class IpstackMiddleware
 
 
     /**
+     * PSR-15 "Single pass" pattern
+     * 
+     * @param  ServerRequestInterface  $request [description]
+     * @param  RequestHandlerInterface $handler [description]
+     * @return ResponseInterface
+     */
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
+    {
+        if (!$this->business( $request)):
+            $this->logger->info("Force Status 400 response");
+            return new GuzzleResponse(400);
+        endif;
+
+        // Call $handler, return response
+        return $handler->handle($request);
+    }
+
+
+
+    /**
+     * Slim3-style "Double Pass" pattern
+     * 
      * @param  ServerRequestInterface $request
      * @param  ResponseInterface      $response
      * @param  callable               $next
@@ -110,12 +136,24 @@ class IpstackMiddleware
     public function __invoke( ServerRequestInterface $request, ResponseInterface $response, callable $next )
     {
 
-        // Get IP address
-        $client_ip = $this->getClientIp( $request );
-
-        if (!$valid = $this->assertClientIp( $client_ip )):
+        if (!$this->business( $request)):
             $this->logger->info("Force Status 400 response");
             return $response->withStatus( 400 );
+        endif;
+
+        // Call $next middleware, return response
+        return $next($request, $response);
+    }
+
+
+
+
+    protected function business( ServerRequestInterface $request )
+    {
+        $client_ip = $this->getClientIp( $request );
+
+        if (!$this->assertClientIp( $client_ip )):
+            return false;
         endif;
 
         // Ask IpstackClient and store result in Request
@@ -127,8 +165,7 @@ class IpstackMiddleware
             $request = $request->withAttribute($attr_name, $ipstack[ $field ] ?? null );
         endforeach;
 
-        // Call $next middleware, return response
-        return $next($request, $response);
+        return true;
     }
 
 
