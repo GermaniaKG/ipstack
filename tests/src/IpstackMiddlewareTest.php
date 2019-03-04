@@ -11,6 +11,8 @@ use GuzzleHttp\Psr7\ServerRequest;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\MiddlewareInterface;
 
 use Prophecy\Argument;
 
@@ -52,13 +54,22 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 		$response = new Response;
 
-		$next = function($request, $response) {
-			return $response;
-		};
 
-		// Invoke middleware as Slim would do
+		//
+		// Double Pass: Invoke middleware as Slim would do
+		// 
+		$next = function($request, $response) { return $response; };
 		$result = $sut($request, $response, $next);
 		$this->assertInstanceOf( ResponseInterface::class, $result );
+
+		//
+		// PSR-15 approach
+		// 
+		$handler = $this->prophesize( RequestHandlerInterface::class );
+		$handler->handle( Argument::any() )->willReturn( $response );
+		$result = $sut->process($request, $handler->reveal());
+		$this->assertInstanceOf( ResponseInterface::class, $result );
+
 	}
 
 
@@ -109,16 +120,24 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 		$response = new Response;
 
-		$next = function($request, $response) {
-			return $response;
-		};
-
-		// Invoke middleware as Slim would do
+		//
+		// Double Pass: Invoke middleware as Slim would do
+		// 
+		$next = function($request, $response) { return $response; };
 		$result = $sut($request, $response, $next);
 		$this->assertInstanceOf( ResponseInterface::class, $result );
-
-		// So this is IMPORTANT
 		$this->assertEquals( $result->getStatusCode(), 400 );
+
+
+		//
+		// PSR-15 approach
+		// 
+		$handler = $this->prophesize( RequestHandlerInterface::class );
+		$handler->handle( Argument::any() )->willReturn( $response );
+		$result = $sut->process($request, $handler->reveal());
+		$this->assertInstanceOf( ResponseInterface::class, $result );
+		$this->assertEquals( $result->getStatusCode(), 400 );
+
 	}
 
 
