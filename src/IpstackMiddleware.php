@@ -89,6 +89,12 @@ class IpstackMiddleware implements MiddlewareInterface
 
 
     /**
+     * @var integer
+     */
+    public $reponse_error_code = 400;
+
+
+    /**
      * @param IpstackClientInterface $ipstack_client       IpstackClient
      * @param string                 $ip_address_attribute Optional: Request attribute name with Client IP address
      * @param array                  $request_attributes   Optional: Map ipstack fields to request attributes
@@ -115,7 +121,7 @@ class IpstackMiddleware implements MiddlewareInterface
     {
         if (!$this->business( $request)):
             $this->logger->info("Force Status 400 response");
-            return new GuzzleResponse(400);
+            return new GuzzleResponse( $this->reponse_error_code );
         endif;
 
         // Call $handler, return response
@@ -138,7 +144,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
         if (!$this->business( $request)):
             $this->logger->info("Force Status 400 response");
-            return $response->withStatus( 400 );
+            return $response->withStatus( $this->reponse_error_code  );
         endif;
 
         // Call $next middleware, return response
