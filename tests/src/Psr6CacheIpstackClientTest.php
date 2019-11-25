@@ -26,12 +26,28 @@ class Psr6CacheIpstackClientTest extends \PHPUnit\Framework\TestCase
 	/**
 	 * @dataProvider provideValidCredentials
 	 */
+	public function testCacheLifeTimeInterceptors( $client, $endpoint, $apikey, $client_ip)
+	{
+		$ipstack_client = new IpstackClient( $endpoint, $apikey, $client );
+
+		$sut = new IpstackClientPsr6CacheDecorator($ipstack_client, $this->cache_itempool);
+		$this->assertNull( $sut->getCacheLifeTime());
+
+		$lifetime = 99;
+		$this->assertEquals($lifetime, $sut->setCacheLifeTime($lifetime)->getCacheLifeTime());
+	}
+
+
+	/**
+	 * @dataProvider provideValidCredentials
+	 */
 	public function testValidRequestOnCache( $client, $endpoint, $apikey, $client_ip)
 	{
 		$ipstack_client = new IpstackClient( $endpoint, $apikey, $client );
 
 
 		$sut = new IpstackClientPsr6CacheDecorator($ipstack_client, $this->cache_itempool);
+		$this->assertNull( $sut->getCacheLifeTime());
 
 		$result = $sut->get( $client_ip );
 		print_r( $result );
