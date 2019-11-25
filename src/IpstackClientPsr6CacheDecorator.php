@@ -17,6 +17,11 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
 	 */
 	public $cache;
 
+	/**
+	 * @var int|null
+	 */
+	public $cache_lifetime;
+
 
 	/**
 	 * @param IpstackClientInterface $ipstack_client
@@ -29,6 +34,24 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
 		$this->setLogger( $logger ?: new NullLogger );
 	}
 
+
+	/**
+	 * @param int|null $lifetime Cache Lifetime in seconds (or NULL)
+	 * @return self
+	 */
+	public function setCacheLifeTime( $lifetime )
+	{
+		$this->cache_lifetime = $lifetime;
+		return $this;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	public function getCacheLifeTime()
+	{
+		return $this->cache_lifetime;
+	}
 
 
 	public function get( string $client_ip, array $custom_query = array() ) : array
@@ -47,7 +70,12 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
 
             // Store data for future use.
             $this->logger->info("Write ipstack info to cache", $ipstack);
-            $this->cache->save($item->set($ipstack));
+            $item->set($ipstack);
+            
+            $lifetime = $this->getCacheLifeTime();
+          	$item->expiresAfter($lifetime);
+
+            $this->cache->save($item);
 
         // Valid item found
         else:

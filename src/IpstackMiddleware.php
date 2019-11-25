@@ -153,7 +153,12 @@ class IpstackMiddleware implements MiddlewareInterface
 
 
 
-
+    /**
+     * Perfoms the middelware action
+     * 
+     * @param  ServerRequestInterface $request
+     * @return bool
+     */
     protected function business( ServerRequestInterface $request )
     {
         $client_ip = $this->getClientIp( $request );
