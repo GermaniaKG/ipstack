@@ -93,6 +93,9 @@ $cache   = new \Stash\Pool(
 // Setup the decorator
 $caching_ipstack = new IpstackClientPsr6CacheDecorator($ipstack, $cache);
 
+// Optional: Set lifetime in seconds (or null)
+$caching_ipstack->setCacheLifeTime( 3600 );
+
 // Use as usual
 $response = $caching_ipstack->get( "8.8.8.8" );
 ```
