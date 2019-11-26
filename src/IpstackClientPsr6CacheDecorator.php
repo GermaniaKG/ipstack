@@ -22,14 +22,20 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
 	 */
 	public $cache_lifetime;
 
+	/**
+	 * @var string
+	 */
+	public $loglevel_name;
+
 
 	/**
 	 * @param IpstackClientInterface $ipstack_client
 	 * @param CacheItemPoolInterface $cache           PSR-6 Cache ItemPool
 	 */
-	public function __construct( IpstackClientInterface $ipstack_client, CacheItemPoolInterface $cache, LoggerInterface $logger = null )
+	public function __construct( IpstackClientInterface $ipstack_client, CacheItemPoolInterface $cache, LoggerInterface $logger = null, string $loglevel_name = "info" )
 	{
 		$this->ipstack_client = $ipstack_client;
+		$this->loglevel_name = $loglevel_name;
 		$this->cache = $cache;
 		$this->setLogger( $logger ?: new NullLogger );
 	}
@@ -69,7 +75,7 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
             $ipstack = $this->ipstack_client->get( $client_ip, $custom_query );
 
             // Store data for future use.
-            $this->logger->info("Write ipstack info to cache", $ipstack);
+            $this->logger->log( $this->loglevel_name, "Write ipstack info to cache", $ipstack);
             $item->set($ipstack);
             
             $lifetime = $this->getCacheLifeTime();
@@ -79,7 +85,7 @@ class IpstackClientPsr6CacheDecorator implements IpstackClientInterface
 
         // Valid item found
         else:
-            $this->logger->notice("Found ipstack info in cache", $ipstack);
+            $this->logger->log($this->loglevel_name, "Found ipstack info in cache", $ipstack);
         endif;
 
         return $ipstack;
