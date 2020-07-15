@@ -119,10 +119,17 @@ class IpstackMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface
     {
-        if (!$this->business( $request)):
+        $ipstack = $this->business( $request);
+        if (false === $ipstack):
             $this->logger->info("Force Status 400 response");
             return new GuzzleResponse( $this->reponse_error_code );
         endif;
+
+        $request = $request->withAttribute( $this->ipstack_attribute, $ipstack);
+        // Map certain ipstack fields to custom request attributes
+        foreach( $this->ipstack_attributes as $field => $attr_name):
+            $request = $request->withAttribute($attr_name, $ipstack[ $field ] ?? null );
+        endforeach;
 
         // Call $handler, return response
         return $handler->handle($request);
@@ -141,11 +148,18 @@ class IpstackMiddleware implements MiddlewareInterface
      */
     public function __invoke( ServerRequestInterface $request, ResponseInterface $response, callable $next )
     {
-
-        if (!$this->business( $request)):
+        $ipstack = $this->business( $request);
+        if (false === $ipstack):
             $this->logger->info("Force Status 400 response");
             return $response->withStatus( $this->reponse_error_code  );
         endif;
+
+        $request = $request->withAttribute( $this->ipstack_attribute, $ipstack);
+        // Map certain ipstack fields to custom request attributes
+        foreach( $this->ipstack_attributes as $field => $attr_name):
+            $request = $request->withAttribute($attr_name, $ipstack[ $field ] ?? null );
+        endforeach;
+
 
         // Call $next middleware, return response
         return $next($request, $response);
@@ -169,14 +183,8 @@ class IpstackMiddleware implements MiddlewareInterface
 
         // Ask IpstackClient and store result in Request
         $ipstack = $this->askIpStack( $client_ip );
-        $request = $request->withAttribute( $this->ipstack_attribute, $ipstack);
 
-        // Map certain ipstack fields to custom request attributes
-        foreach( $this->ipstack_attributes as $field => $attr_name):
-            $request = $request->withAttribute($attr_name, $ipstack[ $field ] ?? null );
-        endforeach;
-
-        return true;
+        return $ipstack;
     }
 
 
@@ -187,24 +195,24 @@ class IpstackMiddleware implements MiddlewareInterface
      * @param  ServerRequestInterface $request The request
      * @return string                          Client IP address string
      */
-	protected function getClientIp(ServerRequestInterface $request) : string
+    protected function getClientIp(ServerRequestInterface $request) : string
     {
         if (!empty($this->ip_address_attribute)):
-        	$client_ip = $request->getAttribute( $this->ip_address_attribute );
-        	$log_msg = "Use IP from Request attribute";
-        	$ip_src  = $this->ip_address_attribute;
+            $client_ip = $request->getAttribute( $this->ip_address_attribute );
+            $log_msg = "Use IP from Request attribute";
+            $ip_src  = $this->ip_address_attribute;
         else:
-	    	$serverParams = $request->getServerParams();
-	    	$client_ip = $serverParams['REMOTE_ADDR'] ?? "";
+            $serverParams = $request->getServerParams();
+            $client_ip = $serverParams['REMOTE_ADDR'] ?? "";
 
-        	$log_msg = "Use IP from SERVER";
-        	$ip_src  = "REMOTE_ADDR";
+            $log_msg = "Use IP from SERVER";
+            $ip_src  = "REMOTE_ADDR";
         endif;
 
-    	$this->logger->debug($log_msg, [
-			'src' => $ip_src,
-			'ip' => $client_ip
-    	]);        	
+        $this->logger->debug($log_msg, [
+            'src' => $ip_src,
+            'ip' => $client_ip
+        ]);         
 
         return $client_ip ?: "";
     }
@@ -222,14 +230,14 @@ class IpstackMiddleware implements MiddlewareInterface
      */
     protected function askIpStack( string $client_ip ) : array
     {
-    	// Prepare result set
-    	$custom_fields  = array_keys( $this->ipstack_attributes );
-    	$fields         = array_merge($custom_fields, $this->ipstack_default_fields);
+        // Prepare result set
+        $custom_fields  = array_keys( $this->ipstack_attributes );
+        $fields         = array_merge($custom_fields, $this->ipstack_default_fields);
 
-    	$default_return = array_fill_keys($fields, null);
-    	$default_return['ip'] = $client_ip;
+        $default_return = array_fill_keys($fields, null);
+        $default_return['ip'] = $client_ip;
 
-    	// The business
+        // The business
         try {
             $ipstack = $this->ipstack_client->get( $client_ip, [
                 "fields"     => join(",", $fields),
@@ -250,7 +258,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
         }
         catch (IpstackExceptionInterface $e) {
-        	// At least: 
+            // At least: 
             return $default_return;
         }
 
