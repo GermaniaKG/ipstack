@@ -23,16 +23,16 @@ use Psr\Log\NullLogger;
  * Requirement:
  *
  *     This middleware requires a ServerRequest attribute called "ip_address"
- *     as provided by akrabat's Slim Client IP address middleware 
+ *     as provided by akrabat's Slim Client IP address middleware
  *     - which therefore must be executed before this one!
- *     
+ *
  *     https://github.com/akrabat/ip-address-middleware
- * 
+ *
  * Basic conecpts:
  *
  * IP to Geolocation:
  *     This class requires an IpstackClient instance provided by germania-kg/ipstack.
- *     which asks the "IP to Geolocation" API from ipstack (https://ipstack.com). 
+ *     which asks the "IP to Geolocation" API from ipstack (https://ipstack.com).
  *     Since we currently are using the "free plan", usage is limited to 10.000 API calls per month.
  */
 class IpstackMiddleware implements MiddlewareInterface
@@ -41,8 +41,8 @@ class IpstackMiddleware implements MiddlewareInterface
 
 
     /**
-     * Maps ipstack response fields to Request attribute Names. 
-     * 
+     * Maps ipstack response fields to Request attribute Names.
+     *
      * Array keys are ipstack fields, values are attribute names,
      * for example:
      *
@@ -50,7 +50,7 @@ class IpstackMiddleware implements MiddlewareInterface
      *          "country_code" => "X-IpstackCountryCode",
      *          "language"     => "X-IpstackLanguage"
      *     );
-     * 
+     *
      * @var array
      */
     public $ipstack_attributes = array();
@@ -58,7 +58,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
     /**
      * Specifies the ipstack response fields that will be requested always.
-     * 
+     *
      * @see https://ipstack.com/documentation#fields
      * @var array
      */
@@ -68,7 +68,7 @@ class IpstackMiddleware implements MiddlewareInterface
     /**
      * Request attribute with IP address as described here:
      * http://www.slimframework.com/docs/v3/cookbook/ip-address.html
-     * 
+     *
      * @var string
      */
     public $ip_address_attribute = "ip_address";
@@ -76,7 +76,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
     /**
      * Request attribute to store the full ipstack information
-     * 
+     *
      * @var string
      */
     public $ipstack_attribute = "ipstack";
@@ -94,25 +94,47 @@ class IpstackMiddleware implements MiddlewareInterface
     public $reponse_error_code = 400;
 
 
+
+    /**
+     * @var string
+     */
+    public $success_loglevel = "notice";
+
+
+    /**
+     * @var string
+     */
+    public $invalid_ip_loglevel = "error";
+
+
+    /**
+     * @var string
+     */
+    public $ipstack_error_loglevel = "error";
+
+
     /**
      * @param IpstackClientInterface $ipstack_client       IpstackClient
      * @param string                 $ip_address_attribute Optional: Request attribute name with Client IP address
      * @param array                  $request_attributes   Optional: Map ipstack fields to request attributes
      * @param LoggerInterface|null   $logger               Optional: PSR-3 Logger
      */
-    public function __construct( IpstackClientInterface $ipstack_client, string $ip_address_attribute = null, array $ipstack_attributes = array(), LoggerInterface $logger = null )
+    public function __construct( IpstackClientInterface $ipstack_client, string $ip_address_attribute = null, array $ipstack_attributes = array(), LoggerInterface $logger = null, string $success_loglevel = null , string $invalid_ip_loglevel = null , string $ipstack_error_loglevel = null )
     {
-        $this->ipstack_client       = $ipstack_client;        
-        $this->ip_address_attribute = $ip_address_attribute;        
-        $this->ipstack_attributes   = $ipstack_attributes;
-        
+        $this->ipstack_client         = $ipstack_client;
+        $this->ip_address_attribute   = $ip_address_attribute;
+        $this->ipstack_attributes     = $ipstack_attributes;
+        $this->success_loglevel       = $success_loglevel ?: $this->success_loglevel;
+        $this->invalid_ip_loglevel    = $invalid_ip_loglevel ?: $this->invalid_ip_loglevel;
+        $this->ipstack_error_loglevel = $ipstack_error_loglevel ?: $this->ipstack_error_loglevel;
+
         $this->setLogger( $logger ?: new NullLogger );
     }
 
 
     /**
      * PSR-15 "Single pass" pattern
-     * 
+     *
      * @param  ServerRequestInterface  $request [description]
      * @param  RequestHandlerInterface $handler [description]
      * @return ResponseInterface
@@ -121,7 +143,8 @@ class IpstackMiddleware implements MiddlewareInterface
     {
         $ipstack = $this->business( $request);
         if (false === $ipstack):
-            $this->logger->info("Force Status 400 response");
+            $m = sprintf("Could not determine client IP, force status '%s' response", $this->reponse_error_code);
+            $this->logger->log($this->invalid_ip_loglevel, $m);
             return new GuzzleResponse( $this->reponse_error_code );
         endif;
 
@@ -139,7 +162,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
     /**
      * Slim3-style "Double Pass" pattern
-     * 
+     *
      * @param  ServerRequestInterface $request
      * @param  ResponseInterface      $response
      * @param  callable               $next
@@ -150,7 +173,8 @@ class IpstackMiddleware implements MiddlewareInterface
     {
         $ipstack = $this->business( $request);
         if (false === $ipstack):
-            $this->logger->info("Force Status 400 response");
+            $m = sprintf("Could not determine client IP, force status '%s' response", $this->reponse_error_code);
+            $this->logger->log($this->invalid_ip_loglevel, $m);
             return $response->withStatus( $this->reponse_error_code  );
         endif;
 
@@ -169,7 +193,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
     /**
      * Perfoms the middelware action
-     * 
+     *
      * @param  ServerRequestInterface $request
      * @return bool
      */
@@ -191,7 +215,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
     /**
      * Returns the client's IP, either from request attribute name or REMOTE_ADDR.
-     * 
+     *
      * @param  ServerRequestInterface $request The request
      * @return string                          Client IP address string
      */
@@ -211,8 +235,8 @@ class IpstackMiddleware implements MiddlewareInterface
 
         $this->logger->debug($log_msg, [
             'src' => $ip_src,
-            'ip' => $client_ip
-        ]);         
+            'clientIp' => $client_ip
+        ]);
 
         return $client_ip ?: "";
     }
@@ -221,7 +245,7 @@ class IpstackMiddleware implements MiddlewareInterface
 
     /**
      * Asks the ipstack API about information for the given IP.
-     * 
+     *
      * If something goes wrong, an array with default values
      * will be returned.
      *
@@ -246,19 +270,25 @@ class IpstackMiddleware implements MiddlewareInterface
 
             // Log things. Make sure to log only default fields
             // See "$ipstack_default_fields"
-            $this->logger->notice("Success: ipstack response", [
-                'client_ip'     => $ipstack['ip'],
-                'country_code'  => $ipstack['country_code'],
-                'country_name'  => $ipstack['country_name'],
+            $this->logger->log($this->success_loglevel, "Success: ipstack response", [
+                'clientIp'     => $ipstack['ip'],
+                'countryCode'  => $ipstack['country_code'],
+                'countryName'  => $ipstack['country_name'],
             ]);
 
-            // Merge ipstack response 
+            // Merge ipstack response
             $result = array_merge($default_return, $ipstack);
             return $result;
 
         }
         catch (IpstackExceptionInterface $e) {
-            // At least: 
+            $this->logger->log($this->ipstack_error_loglevel, "Asking ipstack failed", [
+                'clientIp' => $client_ip,
+                'exceptionClass' => get_class($e),
+                'exceptionMessage' => $e->getMessage()
+            ]);
+
+            // At least:
             return $default_return;
         }
 
@@ -279,11 +309,11 @@ class IpstackMiddleware implements MiddlewareInterface
             $this->logger->error("Empty IP given?!");
             return false;
         endif;
-        
+
         if( filter_var($client_ip, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV4)) :
             $this->logger->debug("Valid IPv4 address");
             return true;
-        
+
         elseif( filter_var($client_ip, \FILTER_VALIDATE_IP, \FILTER_FLAG_IPV6)) :
             $this->logger->debug("Valid IPv6 address");
             return true;
