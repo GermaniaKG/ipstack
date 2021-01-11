@@ -22,7 +22,7 @@ class IpstackClientTest extends \PHPUnit\Framework\TestCase
 
 		$result = $sut->get( $client_ip );
 		print_r( $result );
-		$this->assertInternalType( "array", $result );
+		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( "ip", $result );
 		$this->assertArrayHasKey( "country_code", $result );
 		$this->assertArrayHasKey( "country_name", $result );
