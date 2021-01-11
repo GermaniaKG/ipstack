@@ -3,21 +3,23 @@ namespace tests;
 
 use Germania\IpstackClient\IpstackClientPsr6CacheDecorator;
 use Germania\IpstackClient\IpstackClient;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class Psr6CacheIpstackClientTest extends \PHPUnit\Framework\TestCase
 {
-	use CredentialsTrait;
+	use CredentialsTrait,
+        ProphecyTrait;
 
 	public $cache_itempool;
 	public $nocache_itempool;
 
-	public function setUp()
+	public function setUp() : void
 	{
-		$options = array('path' => $GLOBALS['IPSTACK_CACHE_PATH'] );
-		$driver = new \Stash\Driver\Sqlite( $options );
-		$this->cache_itempool = new \Stash\Pool( $driver );
+		$this->cache_itempool = new FilesystemAdapter;
 
-		$this->nocache_itempool = new \Stash\Pool( new \Stash\Driver\Ephemeral );
+		$this->nocache_itempool = new ArrayAdapter();
 
 		parent::setUp();
 	}
@@ -51,7 +53,7 @@ class Psr6CacheIpstackClientTest extends \PHPUnit\Framework\TestCase
 
 		$result = $sut->get( $client_ip );
 		print_r( $result );
-		$this->assertInternalType( "array", $result );
+		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( "ip", $result );
 		$this->assertArrayHasKey( "country_code", $result );
 		$this->assertArrayHasKey( "country_name", $result );
@@ -70,7 +72,7 @@ class Psr6CacheIpstackClientTest extends \PHPUnit\Framework\TestCase
 
 		$result = $sut->get( $client_ip );
 		print_r( $result );
-		$this->assertInternalType( "array", $result );
+		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( "ip", $result );
 		$this->assertArrayHasKey( "country_code", $result );
 		$this->assertArrayHasKey( "country_name", $result );

@@ -13,13 +13,14 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Server\MiddlewareInterface;
-
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Argument;
 
 class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 {
 
-	use CredentialsTrait;
+	use CredentialsTrait,
+        ProphecyTrait;
 
 
 	/**
@@ -57,14 +58,14 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 		//
 		// Double Pass: Invoke middleware as Slim would do
-		// 
+		//
 		$next = function($request, $response) { return $response; };
 		$result = $sut($request, $response, $next);
 		$this->assertInstanceOf( ResponseInterface::class, $result );
 
 		//
 		// PSR-15 approach
-		// 
+		//
 		$handler = $this->prophesize( RequestHandlerInterface::class );
 		$handler->handle( Argument::any() )->willReturn( $response );
 		$result = $sut->process($request, $handler->reveal());
@@ -75,27 +76,27 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 	public function provideResponsesAndIpStuff()
 	{
-		$ip4 = $GLOBALS['IPSTACK_DUMMY_IP4']; 
-		$ip6 = $GLOBALS['IPSTACK_DUMMY_IP6']; 
+		$ip4 = $GLOBALS['IPSTACK_DUMMY_IP4'];
+		$ip6 = $GLOBALS['IPSTACK_DUMMY_IP6'];
 
 		$ip4_ipstack_response_mock = [
 			'ip' => $ip4,
 			'country_code' => null,
 			'country_name' => null,
 		];
-		
+
 		$ip6_ipstack_response_mock = [
 			'ip' => $ip6,
 			'country_code' => null,
 			'country_name' => null,
 		];
-		
+
 		return array(
 			[ $ip4_ipstack_response_mock, "ip_address", $ip4],
 			[ $ip4_ipstack_response_mock, null,         $ip4],
 			[ $ip6_ipstack_response_mock, "ip_address", $ip6],
 			[ $ip6_ipstack_response_mock, null,         $ip6]
-		);		
+		);
 	}
 
 
@@ -122,7 +123,7 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 		//
 		// Double Pass: Invoke middleware as Slim would do
-		// 
+		//
 		$next = function($request, $response) { return $response; };
 		$result = $sut($request, $response, $next);
 		$this->assertInstanceOf( ResponseInterface::class, $result );
@@ -131,7 +132,7 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 		//
 		// PSR-15 approach
-		// 
+		//
 		$handler = $this->prophesize( RequestHandlerInterface::class );
 		$handler->handle( Argument::any() )->willReturn( $response );
 		$result = $sut->process($request, $handler->reveal());
@@ -158,8 +159,8 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 			$param_set[] = [ $ipstack_response_mock, null,         $invalid_client_ip];
 		endforeach;
 
-		
-		return $param_set;		
+
+		return $param_set;
 	}
 
 
