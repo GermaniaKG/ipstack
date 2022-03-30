@@ -47,7 +47,7 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 		$sut = new IpstackMiddleware( $ipstack_client->reveal(), $ip_address_attribute );
 
 		$server_params = array('REMOTE_ADDR' => $client_ip);
-		$request  = new ServerRequest('GET', 'http://httpbin.org/get', [], null, null, $server_params);
+		$request  = new ServerRequest('GET', 'http://httpbin.org/get', [], null, "", $server_params);
 
 		if ($ip_address_attribute):
 			$request = $request->withAttribute($ip_address_attribute, $client_ip);
@@ -114,7 +114,7 @@ class IpstackMiddlewareTest extends \PHPUnit\Framework\TestCase
 
 		// Mock various invliad IP addresses
 		$server_params = array('REMOTE_ADDR' => $client_ip);
-		$request  = new ServerRequest('GET', 'http://httpbin.org/get', [], null, null, $server_params);
+		$request  = new ServerRequest('GET', 'http://httpbin.org/get', [], null, "", $server_params);
 		if ($ip_address_attribute):
 			$request = $request->withAttribute($ip_address_attribute, $client_ip);
 		endif;
